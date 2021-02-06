@@ -7,6 +7,7 @@ import Row from 'react-bootstrap/Row';
 import Card from 'react-bootstrap/Card';
 import InputGroup from 'react-bootstrap/InputGroup';
 import FormControl from 'react-bootstrap/FormControl';
+import Spinner from 'react-bootstrap/Spinner';
 
 
 import './App.css';
@@ -21,69 +22,115 @@ const App = (props) => {
   const [saldo, setSaldo] = useState(0);
   const [impuesto, setImpuesto] = useState(0);
 
-  const callApi = (async () => {
-    const response = await fetch(`http://192.81.214.49:8085/rest/msdxc/dxc?ahorro=${ahorro}&sueldo=${sueldo}`,{
-      headers: {
-        "Content-Type": "application/json"
-     }    
-    });
-    let data = await response.json()
-    console.log(`http://192.81.214.49:8085/rest/msdxc/dxc?ahorro=${ahorro}&sueldo=${sueldo}`);
-    console.log(JSON.stringify(data));
-    setDiezporciento(data.dxc);
-    setSaldo(data.saldo);
-    setImpuesto(data.impuesto);
+  const [isLoading, setIsLoading] = useState(false);
 
+
+  const callApi = (async () => {
+    setIsLoading(true);
+
+    try {
+      setIsLoading(true);
+      const response = await fetch(`http://192.81.214.49:8085/rest/msdxc/dxc?ahorro=${ahorro}&sueldo=${sueldo}`, {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+      let data = await response.json()
+      console.log(`http://192.81.214.49:8085/rest/msdxc/dxc?ahorro=${ahorro}&sueldo=${sueldo}`);
+      console.log(JSON.stringify(data));
+
+      setDiezporciento(data.dxc);
+      setSaldo(data.saldo);
+      setImpuesto(data.impuesto);
+      setIsLoading(false);
+    } catch (error) {
+      setIsLoading(false);
+      console.log(`Error ${error}`);
+    }
   });
-  const onInputAhorro = ({target:{value}}) => setAhorro(value);
-  const onInputSueldo = ({target:{value}}) => setSueldo(value);
+
+  const resetValues = (async () => {
+    setIsLoading(true);
+
+    setAhorro('');
+    setSueldo('');
+
+    setIsLoading(false);
+  });
+
+  const onInputAhorro = ({ target: { value } }) => setAhorro(value);
+  const onInputSueldo = ({ target: { value } }) => setSueldo(value);
 
 
   return (
     <Container className="p-3">
-      <Row>
-        <Col xs={4}>
-          <label htmlFor="ahorro">Ahorro</label>
-          <InputGroup className="mb-3">
-            <InputGroup.Prepend>
-              <InputGroup.Text>$</InputGroup.Text>
-            </InputGroup.Prepend>
-            <FormControl id="iMonto" onChange={onInputAhorro} value={ahorro}  aria-label="Monto Ahorrado  en Pesos" />
-          </InputGroup>
+      <Col>
+        <Row>
+          <Col xs={5}>
+            <label htmlFor="ahorro">Ahorro</label>
+            <InputGroup className="mb-3">
+              <InputGroup.Prepend>
+                <InputGroup.Text>$</InputGroup.Text>
+              </InputGroup.Prepend>
+              <FormControl id="iAhorro" onChange={onInputAhorro} value={ahorro} aria-label="Monto Ahorrado  en Pesos" />
+            </InputGroup>
 
-          <label htmlFor="sueldo">Sueldo</label>
-          <InputGroup className="mb-3">
-            <InputGroup.Prepend>
-              <InputGroup.Text>$</InputGroup.Text>
-            </InputGroup.Prepend>
-            <FormControl id="iAhorro" onChange={onInputSueldo}  value={sueldo} aria-label="Monto Sueldo en Pesos" />
-          </InputGroup>
+            <label htmlFor="sueldo">Sueldo</label>
+            <InputGroup className="mb-3">
+              <InputGroup.Prepend>
+                <InputGroup.Text>$</InputGroup.Text>
+              </InputGroup.Prepend>
+              <FormControl id="iSueldo" onChange={onInputSueldo} value={sueldo} aria-label="Monto Sueldo en Pesos" />
+            </InputGroup>
 
-          <Button variant="primary" type="submit" onClick={callApi} >
-            Enviar
-            </Button>
-        </Col>
-        <Col xs={8} style={{ padding: 10 }}>
-          <Card
-            bg={'primary'}
-            text={'light'}
-          >
-            <Card.Body>
-              <Card.Title> Resultado Calculo 10% </Card.Title>
-              <Card.Text id="diez">
-                10% : {diezporciento}
-              </Card.Text>
-              <Card.Text id="saldo">
-                Saldo : {saldo}
-              </Card.Text>
-              <Card.Text id="impuesto">
-                Impuesto : {impuesto}
-              </Card.Text>
-            </Card.Body>
-          </Card>
+            <Row style={{ marginLeft: 2 }}>
+              <Col xs={4}>
+                <Button variant="primary" type="submit" id="btnSubmit" onClick={callApi} >
+                  Enviar
+              </Button>
+              </Col>
 
-        </Col>
-      </Row>
+              <Col xs={4}>
+                <Button variant="primary" type="submit" id="btnReset" onClick={resetValues} >
+                  Reset
+              </Button>
+              </Col>
+
+              <Col xs={4}>
+                {
+                  isLoading ? (
+                    <Spinner animation="border" role="status" >
+                      <span className="sr-only">Loading...</span>
+                    </Spinner>
+
+                  ) : null
+                }
+              </Col>
+            </Row>
+          </Col>
+          <Col xs={7} style={{ padding: 10 }}>
+            <Card
+              bg={'primary'}
+              text={'light'}
+            >
+              <Card.Body>
+                <Card.Title> Resultado Calculo 10% </Card.Title>
+                <Card.Text>
+                  10% : <span id="diez">{diezporciento}</span>
+                </Card.Text>
+                <Card.Text>
+                  Saldo : <span id="saldo">{saldo}</span>
+                </Card.Text>
+                <Card.Text>
+                  Impuesto : <span id="impuesto">{impuesto}</span>
+                </Card.Text>
+              </Card.Body>
+            </Card>
+
+          </Col>
+        </Row>
+
+      </Col>
 
     </Container>
   );
