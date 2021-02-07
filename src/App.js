@@ -30,13 +30,13 @@ const App = (props) => {
 
     try {
       setIsLoading(true);
-      const response = await fetch(`http://192.81.214.49:8085/rest/msdxc/dxc?ahorro=${ahorro}&sueldo=${sueldo}`, {
+      const response = await fetch(`http://127.0.0.1:8085/rest/msdxc/dxc?ahorro=${ahorro}&sueldo=${sueldo}`, {
         headers: {
           "Content-Type": "application/json"
         }
       });
       let data = await response.json()
-      console.log(`http://192.81.214.49:8085/rest/msdxc/dxc?ahorro=${ahorro}&sueldo=${sueldo}`);
+      console.log(`http://127.0.0.1:8085/rest/msdxc/dxc?ahorro=${ahorro}&sueldo=${sueldo}`);
       console.log(JSON.stringify(data));
 
       setDiezporciento(data.dxc);
@@ -126,12 +126,9 @@ const App = (props) => {
                 </Card.Text>
               </Card.Body>
             </Card>
-
           </Col>
         </Row>
-
       </Col>
-
     </Container>
   );
 }
